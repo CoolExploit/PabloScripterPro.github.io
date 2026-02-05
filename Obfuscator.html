@@ -2,1025 +2,183 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Lua Obfuscator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Lua Obfuscator - PabloScripter </title>
+
     <style>
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
         body {
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            color: #ffffff;
+            background: linear-gradient(135deg, #0f0f14, #151522);
+            color: #eaeaf0;
             min-height: 100vh;
-            padding: 20px;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        /* Animated background particles */
-        .bg-particles {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        .particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: rgba(78, 205, 196, 0.3);
-            border-radius: 50%;
-            animation: float 6s infinite ease-in-out;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        .title {
-            font-size: 3em;
-            font-weight: 900;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 15px;
-            text-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
-            animation: titleGlow 3s ease-in-out infinite alternate;
-        }
-
-        @keyframes titleGlow {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.2); }
-        }
-
-        .subtitle {
-            color: #a0a0a0;
-            font-size: 1.2em;
-            font-weight: 300;
-        }
-
-        .version-badge {
-            display: inline-block;
-            background: linear-gradient(45deg, #4ecdc4, #45b7d1);
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-
-        .controls {
             display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
             align-items: center;
             justify-content: center;
-            flex-wrap: wrap;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 25px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
+        .app {
+            width: 90%;
+            max-width: 1100px;
+            background: rgba(20, 20, 30, 0.9);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
         }
 
-        .control-label {
-            font-size: 0.9em;
-            color: #4ecdc4;
-            font-weight: 600;
-        }
-
-        .mode-selector, .preset-selector {
-            padding: 12px 20px;
-            border-radius: 10px;
-            border: 2px solid #333;
-            background: rgba(255, 255, 255, 0.05);
-            color: #fff;
-            font-size: 16px;
-            outline: none;
-            cursor: pointer;
-            min-width: 160px;
-            transition: all 0.3s ease;
-        }
-
-        .mode-selector:hover, .preset-selector:hover {
-            border-color: #4ecdc4;
-            background: rgba(78, 205, 196, 0.1);
-            transform: translateY(-1px);
-        }
-
-        .start-btn {
-            padding: 15px 40px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .start-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .start-btn:hover:not(:disabled)::before {
-            left: 100%;
-        }
-
-        .start-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
-
-        .start-btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .options-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .option-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .option-checkbox {
-            width: 18px;
-            height: 18px;
-            accent-color: #4ecdc4;
-        }
-
-        .option-label {
-            color: #e0e0e0;
-            font-size: 0.95em;
-            cursor: pointer;
-        }
-
-        .io-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 25px;
-        }
-
-        .input-section, .output-section {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            padding: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .section-title {
-            font-size: 1.3em;
-            color: #4ecdc4;
-            font-weight: bold;
-        }
-
-        .copy-btn {
-            background: rgba(78, 205, 196, 0.2);
-            border: 1px solid #4ecdc4;
-            color: #4ecdc4;
-            padding: 6px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85em;
-            transition: all 0.3s ease;
-        }
-
-        .copy-btn:hover {
-            background: rgba(78, 205, 196, 0.4);
-        }
-
-        .code-textarea {
-            width: 100%;
-            height: 350px;
-            background: rgba(0, 0, 0, 0.6);
-            border: 2px solid #333;
-            border-radius: 10px;
-            color: #fff;
-            padding: 20px;
-            font-family: 'Fira Code', 'Courier New', monospace;
-            font-size: 14px;
-            line-height: 1.4;
-            resize: vertical;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .code-textarea:focus {
-            border-color: #4ecdc4;
-            box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
-        }
-
-        .progress-container {
-            display: none;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .progress-header {
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .progress-title {
-            font-size: 1.2em;
-            font-weight: bold;
+        header h1 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
-        .progress-percentage {
-            font-size: 1.1em;
-            color: #4ecdc4;
-            font-weight: bold;
+        header span {
+            font-size: 0.9rem;
+            opacity: 0.6;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #4ecdc4, #45b7d1);
-            width: 0%;
-            transition: width 0.4s ease;
-            border-radius: 10px;
-            position: relative;
-        }
-
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        .status-text {
-            text-align: center;
-            color: #a0a0a0;
-            font-size: 0.95em;
-        }
-
-        .stats-container {
+        .editor {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 20px;
-            border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
 
-        .stat-item {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.03);
+        .panel {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel label {
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        textarea {
+            resize: none;
+            width: 100%;
+            height: 350px;
+            background: #0e0e16;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 14px;
+            color: #eaeaf0;
+            font-family: "JetBrains Mono", monospace;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            outline: none;
+        }
+
+        textarea::placeholder {
+            opacity: 0.4;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .options {
+            display: flex;
+            gap: 14px;
+        }
+
+        .options button {
+            background: #1c1c2b;
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #eaeaf0;
+            padding: 10px 16px;
             border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s ease;
         }
 
-        .stat-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            color: #4ecdc4;
+        .options button:hover {
+            background: #232338;
         }
 
-        .stat-label {
-            font-size: 0.9em;
-            color: #a0a0a0;
-            margin-top: 5px;
+        .action button {
+            background: linear-gradient(135deg, #6b5cff, #8a7dff);
+            border: none;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 10px 30px rgba(107,92,255,0.35);
         }
 
-        .signature {
-            text-align: center;
-            margin-top: 30px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            font-style: italic;
-            color: #4ecdc4;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        .action button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 14px 36px rgba(107,92,255,0.45);
         }
 
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-            
-            .io-container {
+        footer {
+            margin-top: 14px;
+            text-align: right;
+            font-size: 0.75rem;
+            opacity: 0.4;
+        }
+
+        @media (max-width: 900px) {
+            .editor {
                 grid-template-columns: 1fr;
             }
-            
-            .controls {
-                flex-direction: column;
-            }
-            
-            .title {
-                font-size: 2em;
-            }
-        }
-
-        .tooltip {
-            position: relative;
-            cursor: help;
-        }
-
-        .tooltip::after {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip:hover::after {
-            opacity: 1;
         }
     </style>
 </head>
 <body>
-    <div class="bg-particles" id="particles"></div>
-    
-    <div class="container">
-        <div class="header">
-            <h1 class="title">Enhanced Roblox Lua Obfuscator</h1>
-            <p class="subtitle">PabloScripter Pro — Advanced Script Protection & Security</p>
-            <span class="version-badge">v2.0 Professional</span>
+
+    <div class="app">
+        <header>
+            <h1>Lua Obfuscator</h1>
+            <span>Roblox • Client-side</span>
+        </header>
+
+        <div class="editor">
+            <div class="panel">
+                <label>Input Lua Script</label>
+                <textarea placeholder="-- Paste your Roblox Lua script here"></textarea>
+            </div>
+
+            <div class="panel">
+                <label>Obfuscated Output</label>
+                <textarea placeholder="-- Obfuscated code will appear here" readonly></textarea>
+            </div>
         </div>
 
         <div class="controls">
-            <div class="control-group">
-                <span class="control-label">Protection Level</span>
-                <select class="mode-selector" id="modeSelector">
-                    <option value="light">Light Protection</option>
-                    <option value="standard" selected>Standard</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="enterprise">Enterprise</option>
-                    <option value="military">Military Grade</option>
-                </select>
-            </div>
-            
-            <div class="control-group">
-                <span class="control-label">Preset Configuration</span>
-                <select class="preset-selector" id="presetSelector">
-                    <option value="balanced">Balanced</option>
-                    <option value="performance">Performance</option>
-                    <option value="security">Maximum Security</option>
-                    <option value="stealth">Stealth Mode</option>
-                </select>
+            <div class="options">
+                <button>Rename Variables</button>
+                <button>String Encoding</button>
+                <button>Control Flow</button>
             </div>
 
-            <button class="start-btn" id="startBtn" onclick="startObfuscation()">
-                🚀 Start Obfuscation
-            </button>
-        </div>
-
-        <div class="options-panel">
-            <div class="option-item">
-                <input type="checkbox" id="antiDebug" class="option-checkbox" checked>
-                <label for="antiDebug" class="option-label tooltip" data-tooltip="Prevents debugging attempts">Anti-Debug Protection</label>
-            </div>
-            <div class="option-item">
-                <input type="checkbox" id="controlFlow" class="option-checkbox" checked>
-                <label for="controlFlow" class="option-label tooltip" data-tooltip="Scrambles code execution flow">Control Flow Obfuscation</label>
-            </div>
-            <div class="option-item">
-                <input type="checkbox" id="stringEnc" class="option-checkbox" checked>
-                <label for="stringEnc" class="option-label tooltip" data-tooltip="Encrypts all string literals">String Encryption</label>
-            </div>
-            <div class="option-item">
-                <input type="checkbox" id="varRename" class="option-checkbox" checked>
-                <label for="varRename" class="option-label tooltip" data-tooltip="Renames all variables randomly">Variable Renaming</label>
-            </div>
-            <div class="option-item">
-                <input type="checkbox" id="junkCode" class="option-checkbox" checked>
-                <label for="junkCode" class="option-label tooltip" data-tooltip="Adds fake code to confuse">Junk Code Injection</label>
-            </div>
-            <div class="option-item">
-                <input type="checkbox" id="compression" class="option-checkbox">
-                <label for="compression" class="option-label tooltip" data-tooltip="Compresses the final output">Code Compression</label>
+            <div class="action">
+                <button>Obfuscate</button>
             </div>
         </div>
 
-        <div class="progress-container" id="progressContainer">
-            <div class="progress-header">
-                <span class="progress-title">Obfuscation Progress</span>
-                <span class="progress-percentage" id="progressPercentage">0%</span>
-            </div>
-            <div class="progress-bar">
-                <div class="progress-fill" id="progressFill"></div>
-            </div>
-            <div class="status-text" id="statusText">Initializing...</div>
-        </div>
-
-        <div class="io-container">
-            <div class="input-section">
-                <div class="section-header">
-                    <h3 class="section-title">📝 Input Roblox Script</h3>
-                </div>
-                <textarea class="code-textarea" id="inputCode" placeholder='-- Enter your Roblox Lua script here
-print("Hello World!")
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
-workspace.Gravity = 50
-wait(1)
-print("Script executed successfully!")'></textarea>
-            </div>
-            <div class="output-section">
-                <div class="section-header">
-                    <h3 class="section-title">🔒 Obfuscated Output</h3>
-                    <button class="copy-btn" id="copyBtn" onclick="copyToClipboard()">📋 Copy</button>
-                </div>
-                <textarea class="code-textarea" id="outputCode" readonly placeholder="Your obfuscated code will appear here..."></textarea>
-            </div>
-        </div>
-
-        <div class="stats-container" id="statsContainer" style="display: none;">
-            <div class="stat-item">
-                <div class="stat-value" id="originalSize">0</div>
-                <div class="stat-label">Original Size</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="obfuscatedSize">0</div>
-                <div class="stat-label">Obfuscated Size</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="compressionRatio">0%</div>
-                <div class="stat-label">Size Increase</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="processingTime">0s</div>
-                <div class="stat-label">Processing Time</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-value" id="securityLevel">High</div>
-                <div class="stat-label">Security Level</div>
-            </div>
-        </div>
-
-        <div class="signature">
-            <strong>🛡️ Enhanced Obfuscator — PabloScripter Pro Was Here 🛡️</strong><br>
-            <small>Protecting your scripts with military-grade obfuscation technology</small>
-        </div>
+        <footer>
+            Lua Obfuscator UI — JS coming next
+        </footer>
     </div>
 
-    <script>
-        // Create animated background particles
-        function createParticles() {
-            const particlesContainer = document.getElementById('particles');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particlesContainer.appendChild(particle);
-            }
-        }
-
-        // Enhanced random variable generator with multiple naming schemes
-        function generateRandomVar(length = 10, style = 'mixed') {
-            const styles = {
-                mixed: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_',
-                underscore: 'abcdefghijklmnopqrstuvwxyz_',
-                hex: '0123456789abcdef',
-                obfuscated: 'lIo0O1'
-            };
-            
-            const chars = styles[style] || styles.mixed;
-            const firstChars = chars.replace(/[0-9]/g, '');
-            
-            let result = firstChars.charAt(Math.floor(Math.random() * firstChars.length));
-            for (let i = 1; i < length; i++) {
-                result += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
-            return result;
-        }
-
-        // Advanced string encoding techniques
-        function encodeString(str, method = 'bytes') {
-            switch (method) {
-                case 'bytes':
-                    return str.split('').map(c => c.charCodeAt(0)).join(',');
-                case 'hex':
-                    return str.split('').map(c => '0x' + c.charCodeAt(0).toString(16)).join(',');
-                case 'base64':
-                    return btoa(str);
-                case 'reverse':
-                    return str.split('').reverse().join('');
-                case 'xor':
-                    const key = Math.floor(Math.random() * 255);
-                    return str.split('').map(c => c.charCodeAt(0) ^ key).join(',') + '|' + key;
-                default:
-                    return str;
-            }
-        }
-
-        // Enhanced junk code generation
-        function generateAdvancedJunk(complexity = 1) {
-            const junkTypes = [
-                // Variable declarations
-                () => `local ${generateRandomVar()} = ${Math.floor(Math.random() * 10000)}`,
-                () => `local ${generateRandomVar()} = "${generateRandomVar(20)}"`,
-                () => `local ${generateRandomVar()} = {}`,
-                () => `local ${generateRandomVar()} = true`,
-                () => `local ${generateRandomVar()} = false`,
-                
-                // Service references
-                () => `local ${generateRandomVar()} = game:GetService("${['Players', 'Workspace', 'ReplicatedStorage', 'Lighting', 'TweenService'][Math.floor(Math.random() * 5)]}")`,
-                
-                // Mathematical operations
-                () => {
-                    const v1 = generateRandomVar();
-                    const v2 = generateRandomVar();
-                    return `local ${v1} = ${Math.floor(Math.random() * 100)}\nlocal ${v2} = ${v1} + ${Math.floor(Math.random() * 50)}`;
-                },
-                
-                // Functions
-                () => `local function ${generateRandomVar()}() return ${Math.floor(Math.random() * 1000)} end`,
-                () => `local function ${generateRandomVar()}(${generateRandomVar()}) return ${generateRandomVar()} end`,
-                
-                // Control structures
-                () => `if ${Math.random() > 0.5} then local ${generateRandomVar()} = ${Math.floor(Math.random() * 100)} end`,
-                () => `for ${generateRandomVar()} = 1, ${Math.floor(Math.random() * 10) + 1} do end`,
-                
-                // Table operations
-                () => {
-                    const table = generateRandomVar();
-                    return `local ${table} = {}\n${table}[${Math.floor(Math.random() * 10)}] = ${Math.floor(Math.random() * 100)}`;
-                },
-                
-                // Comments and noise
-                () => `-- ${generateRandomVar(30)}`,
-                () => `--[[ ${generateRandomVar(50)} ]]`,
-                
-                // CFrame and Vector3
-                () => `local ${generateRandomVar()} = CFrame.new(${Math.random() * 100}, ${Math.random() * 100}, ${Math.random() * 100})`,
-                () => `local ${generateRandomVar()} = Vector3.new(${Math.random() * 10}, ${Math.random() * 10}, ${Math.random() * 10})`,
-                
-                // Time-based operations
-                () => `local ${generateRandomVar()} = tick()`,
-                () => `local ${generateRandomVar()} = os.time()`,
-                
-                // String operations
-                () => `local ${generateRandomVar()} = string.${['upper', 'lower', 'reverse', 'len'][Math.floor(Math.random() * 4)]}("${generateRandomVar(10)}")`,
-                
-                // Instance creation
-                () => `local ${generateRandomVar()} = Instance.new("${['Part', 'Frame', 'TextLabel', 'RemoteEvent'][Math.floor(Math.random() * 4)]}")`,
-            ];
-
-            const selected = [];
-            for (let i = 0; i < complexity; i++) {
-                const junkFunc = junkTypes[Math.floor(Math.random() * junkTypes.length)];
-                selected.push(junkFunc());
-            }
-            
-            return selected.join('\n');
-        }
-
-        // Create multiple decoder functions with different techniques
-        function createDecoder(name, method = 'bytes') {
-            const decoders = {
-                bytes: `local function ${name}(s) local r = {} for c in s:gmatch('%d+') do table.insert(r, string.char(tonumber(c))) end return table.concat(r) end`,
-                hex: `local function ${name}(s) local r = {} for c in s:gmatch('0x%x+') do table.insert(r, string.char(tonumber(c, 16))) end return table.concat(r) end`,
-                base64: `local function ${name}(s) return game:GetService("HttpService"):JSONDecode(atob(s)) end`,
-                xor: `local function ${name}(s) local p, k = s:match('(.+)|(.+)') local r = {} for c in p:gmatch('%d+') do table.insert(r, string.char(tonumber(c) ~ tonumber(k))) end return table.concat(r) end`
-            };
-            return decoders[method] || decoders.bytes;
-        }
-
-        // Anti-debug protection
-        function createAntiDebug() {
-            const checks = [
-                `if game:GetService("CoreGui"):FindFirstChild("DevConsole") then return end`,
-                `if game:GetService("Players").LocalPlayer.UserId == 1 then return end`,
-                `spawn(function() while wait(0.1) do if tick() % 1 < 0.1 then local ${generateRandomVar()} = tick() end end end)`,
-            ];
-            return checks[Math.floor(Math.random() * checks.length)];
-        }
-
-        // Control flow obfuscation
-        function createControlFlow() {
-            const flow = generateRandomVar();
-            const cases = Math.floor(Math.random() * 5) + 3;
-            let result = `local ${flow} = ${Math.floor(Math.random() * cases)}\n`;
-            
-            for (let i = 0; i < cases; i++) {
-                result += `if ${flow} == ${i} then\n${generateAdvancedJunk(2)}\nend\n`;
-            }
-            
-            return result;
-        }
-
-        async function obfuscateScript(code, mode, options, onProgress) {
-            const startTime = Date.now();
-            
-            // Determine intensity and methods based on mode
-            let intensity = 1;
-            let encodingMethod = 'bytes';
-            let junkComplexity = 1;
-            
-            switch (mode) {
-                case 'light':
-                    intensity = 0.3;
-                    junkComplexity = 1;
-                    break;
-                case 'standard':
-                    intensity = 1;
-                    junkComplexity = 2;
-                    break;
-                case 'advanced':
-                    intensity = 1.8;
-                    encodingMethod = 'hex';
-                    junkComplexity = 3;
-                    break;
-                case 'enterprise':
-                    intensity = 2.5;
-                    encodingMethod = 'xor';
-                    junkComplexity = 4;
-                    break;
-                case 'military':
-                    intensity = 3.2;
-                    encodingMethod = 'xor';
-                    junkComplexity = 5;
-                    break;
-            }
-
-            let result = '';
-            
-            // Generate variable names
-            const decoderName = generateRandomVar(15, 'obfuscated');
-            const loaderName = generateRandomVar(12, 'underscore');
-            const execName = generateRandomVar(14, 'mixed');
-            const dataName = generateRandomVar(11, 'hex');
-            const runnerName = generateRandomVar(16, 'obfuscated');
-            const flowName = generateRandomVar(13, 'mixed');
-
-            onProgress(5, "Initializing protection layers...");
-            
-            // Header protection
-            result += `-- Protected by PabloScripter Pro v2.0\n`;
-            result += `-- Security Level: ${mode.toUpperCase()}\n`;
-            result += `-- Generated: ${new Date().toISOString()}\n\n`;
-
-            // Phase 1: Anti-debug (if enabled)
-            if (options.antiDebug) {
-                onProgress(15, "Installing anti-debug protection...");
-                result += createAntiDebug() + '\n\n';
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-
-            // Phase 2: Initial junk injection
-            onProgress(25, "Injecting decoy code...");
-            const phase1Lines = Math.floor(150 * intensity);
-            for (let i = 0; i < phase1Lines / junkComplexity; i++) {
-                result += generateAdvancedJunk(junkComplexity) + '\n';
-            }
-            await new Promise(resolve => setTimeout(resolve, 150));
-
-            // Phase 3: Control flow obfuscation (if enabled)
-            if (options.controlFlow) {
-                onProgress(40, "Scrambling execution flow...");
-                result += createControlFlow() + '\n';
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-
-            // Phase 4: Add decoder with fake decoders
-            onProgress(55, "Installing decryption systems...");
-            // Add fake decoders first
-            for (let i = 0; i < Math.floor(3 * intensity); i++) {
-                const fakeDecoder = generateRandomVar(12);
-                result += createDecoder(fakeDecoder, ['bytes', 'hex'][Math.floor(Math.random() * 2)]) + '\n';
-            }
-            // Add real decoder
-            result += createDecoder(decoderName, encodingMethod) + '\n';
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // Phase 5: Loader system
-            onProgress(65, "Setting up execution environment...");
-            result += `local ${loaderName} = loadstring\n`;
-            result += `local function ${execName}(code) return ${loaderName}(code)() end\n\n`;
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // Phase 6: More junk and fake data
-            onProgress(75, "Embedding security tokens...");
-            const phase3Lines = Math.floor(120 * intensity);
-            for (let i = 0; i < phase3Lines / junkComplexity; i++) {
-                result += generateAdvancedJunk(junkComplexity) + '\n';
-            }
-            
-            // Add fake encoded data
-            for (let i = 0; i < Math.floor(5 * intensity); i++) {
-                const fakeData = Array.from({length: Math.floor(Math.random() * 100 + 50)}, () => Math.floor(Math.random() * 255)).join(',');
-                result += `local ${generateRandomVar()} = "${fakeData}"\n`;
-            }
-            
-            // Add real encoded data
-            const encodedData = encodeString(code, encodingMethod);
-            result += `local ${dataName} = "${encodedData}"\n\n`;
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // Phase 7: Final protection layers
-            onProgress(85, "Applying final security measures...");
-            const phase4Lines = Math.floor(200 * intensity);
-            for (let i = 0; i < phase4Lines / junkComplexity; i++) {
-                result += generateAdvancedJunk(junkComplexity) + '\n';
-            }
-
-            // Phase 8: Hidden execution
-            onProgress(92, "Finalizing obfuscation...");
-            result += `local ${runnerName} = ${decoderName}(${dataName})\n`;
-            
-            // More junk before execution
-            for (let i = 0; i < Math.floor(80 * intensity); i++) {
-                result += generateAdvancedJunk(Math.floor(junkComplexity / 2) + 1) + '\n';
-            }
-            
-            result += `${execName}(${runnerName})\n`;
-            
-            // Final junk
-            const endLines = Math.floor(60 * intensity);
-            for (let i = 0; i < endLines / junkComplexity; i++) {
-                result += generateAdvancedJunk(junkComplexity) + '\n';
-            }
-
-            onProgress(98, "Adding signature...");
-            const timeTaken = ((Date.now() - startTime) / 1000).toFixed(2);
-            result += `\n-- Obfuscated by PabloScripter Pro | Mode: ${mode.toUpperCase()} | Time: ${timeTaken}s | Lines: ${result.split('\n').length}\n`;
-            result += `-- Security Features: ${Object.entries(options).filter(([k, v]) => v).map(([k]) => k).join(', ')}\n`;
-
-            onProgress(100, "Obfuscation complete!");
-            return result;
-        }
-
-        async function copyToClipboard() {
-            const outputCode = document.getElementById('outputCode').value;
-            if (!outputCode) {
-                alert('No code to copy!');
-                return;
-            }
-            
-            try {
-                await navigator.clipboard.writeText(outputCode);
-                const copyBtn = document.getElementById('copyBtn');
-                const originalText = copyBtn.textContent;
-                copyBtn.textContent = '✅ Copied!';
-                copyBtn.style.background = 'rgba(76, 175, 80, 0.3)';
-                
-                setTimeout(() => {
-                    copyBtn.textContent = originalText;
-                    copyBtn.style.background = 'rgba(78, 205, 196, 0.2)';
-                }, 2000);
-            } catch (err) {
-                alert('Failed to copy to clipboard');
-            }
-        }
-
-        function updateStats(originalSize, obfuscatedSize, processingTime, securityLevel) {
-            document.getElementById('originalSize').textContent = formatBytes(originalSize);
-            document.getElementById('obfuscatedSize').textContent = formatBytes(obfuscatedSize);
-            
-            const increase = ((obfuscatedSize - originalSize) / originalSize * 100).toFixed(1);
-            document.getElementById('compressionRatio').textContent = '+' + increase + '%';
-            
-            document.getElementById('processingTime').textContent = processingTime + 's';
-            document.getElementById('securityLevel').textContent = securityLevel;
-            
-            document.getElementById('statsContainer').style.display = 'grid';
-        }
-
-        function formatBytes(bytes) {
-            if (bytes === 0) return '0 B';
-            const k = 1024;
-            const sizes = ['B', 'KB', 'MB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
-        }
-
-        async function startObfuscation() {
-            const inputCode = document.getElementById('inputCode').value.trim();
-            const mode = document.getElementById('modeSelector').value;
-            const preset = document.getElementById('presetSelector').value;
-            
-            const options = {
-                antiDebug: document.getElementById('antiDebug').checked,
-                controlFlow: document.getElementById('controlFlow').checked,
-                stringEnc: document.getElementById('stringEnc').checked,
-                varRename: document.getElementById('varRename').checked,
-                junkCode: document.getElementById('junkCode').checked,
-                compression: document.getElementById('compression').checked
-            };
-
-            const startBtn = document.getElementById('startBtn');
-            const progressContainer = document.getElementById('progressContainer');
-            const progressFill = document.getElementById('progressFill');
-            const progressPercentage = document.getElementById('progressPercentage');
-            const statusText = document.getElementById('statusText');
-            const outputCode = document.getElementById('outputCode');
-
-            if (!inputCode) {
-                alert('Please enter some Roblox Lua code to obfuscate!');
-                return;
-            }
-
-            const startTime = Date.now();
-            startBtn.disabled = true;
-            startBtn.textContent = '⚡ Processing...';
-            progressContainer.style.display = 'block';
-            outputCode.value = '';
-            document.getElementById('statsContainer').style.display = 'none';
-
-            try {
-                const result = await obfuscateScript(inputCode, mode, options, (progress, status) => {
-                    progressFill.style.width = progress + '%';
-                    progressPercentage.textContent = progress + '%';
-                    statusText.textContent = status;
-                });
-
-                outputCode.value = result;
-                
-                const endTime = Date.now();
-                const processingTime = ((endTime - startTime) / 1000).toFixed(2);
-                
-                // Update statistics
-                const securityLevels = {
-                    'light': 'Low',
-                    'standard': 'Medium',
-                    'advanced': 'High',
-                    'enterprise': 'Very High',
-                    'military': 'Maximum'
-                };
-                
-                updateStats(
-                    inputCode.length,
-                    result.length,
-                    processingTime,
-                    securityLevels[mode]
-                );
-                
-            } catch (error) {
-                statusText.textContent = 'Error during obfuscation: ' + error.message;
-                console.error(error);
-                alert('An error occurred during obfuscation. Please try again.');
-            } finally {
-                startBtn.disabled = false;
-                startBtn.textContent = '🚀 Start Obfuscation';
-                
-                setTimeout(() => {
-                    progressContainer.style.display = 'none';
-                    progressFill.style.width = '0%';
-                    progressPercentage.textContent = '0%';
-                }, 3000);
-            }
-        }
-
-        // Preset configurations
-        document.getElementById('presetSelector').addEventListener('change', function() {
-            const preset = this.value;
-            const presets = {
-                balanced: {
-                    antiDebug: true,
-                    controlFlow: true,
-                    stringEnc: true,
-                    varRename: true,
-                    junkCode: true,
-                    compression: false
-                },
-                performance: {
-                    antiDebug: false,
-                    controlFlow: false,
-                    stringEnc: true,
-                    varRename: true,
-                    junkCode: false,
-                    compression: true
-                },
-                security: {
-                    antiDebug: true,
-                    controlFlow: true,
-                    stringEnc: true,
-                    varRename: true,
-                    junkCode: true,
-                    compression: false
-                },
-                stealth: {
-                    antiDebug: true,
-                    controlFlow: true,
-                    stringEnc: true,
-                    varRename: true,
-                    junkCode: true,
-                    compression: true
-                }
-            };
-            
-            const config = presets[preset];
-            if (config) {
-                Object.entries(config).forEach(([key, value]) => {
-                    const element = document.getElementById(key);
-                    if (element) element.checked = value;
-                });
-            }
-        });
-
-        // Add example code on load
-        window.addEventListener('load', () => {
-            createParticles();
-            
-            const exampleCode = `-- Advanced Roblox Script Example
-print("Hello World")`;
-            
-            document.getElementById('inputCode').value = exampleCode;
-        });
-    </script>
 </body>
-
 </html>
